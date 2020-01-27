@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+source vars.txt
+
+
 copirator() {
   echo -e "${green}Started copying the files. Using $USER user and $1 target host${NC}"
   sleep 3
@@ -20,7 +23,7 @@ checker() {
 
 echo -e "${green}Checking the files on source${NC}"
 
-if [ -f /etc/kubernetes/pki/etcd/ca.crt ] && [ -f /etc/kubernetes/pki/apiserver-etcd-client.crt ] && [ -f /etc/kubernetes/pki/apiserver-etcd-client.key ];
+if [ -f ${ETCD_SSL_DIR}/ca.crt ] && [ -f ${MAIN_SSL_DIR}/apiserver-etcd-client.crt ] && [ -f ${MAIN_SSL_DIR}/apiserver-etcd-client.key ];
 then
   echo -e "${green}The necessary files are present${NC}"
 else
@@ -31,11 +34,12 @@ fi
 echo -e "${green}Copying the files to target server${NC}"
 
 
-ssh "$USER"@$MASTER1 mkdir -p /etc/kubernetes/pki/etcd/
+ssh "$USER"@$MASTER1 mkdir -p ${ETCD_SSL_DIR}
 
-copirator $MASTER1 /etc/kubernetes/pki/etcd/ca.crt /etc/kubernetes/pki/etcd/
-copirator $MASTER1 /etc/kubernetes/pki/apiserver-etcd-client.crt /etc/kubernetes/pki/
-copirator $MASTER1 /etc/kubernetes/pki/apiserver-etcd-client.key /etc/kubernetes/pki/
+copirator $MASTER1 ${ETCD_SSL_DIR}/ca.crt ${ETCD_SSL_DIR}
+copirator $MASTER1 ${MAIN_SSL_DIR}/apiserver-etcd-client.crt ${MAIN_SSL_DIR}
+copirator $MASTER1 ${MAIN_SSL_DIR}/apiserver-etcd-client.key ${MAIN_SSL_DIR}
+
 
 
 echo -e "${green}Creating the kubeadm init conf${NC}"
@@ -45,7 +49,7 @@ ssh $USER@$MASTER1 cat << EOF > /$USER/kubeadm-config.yaml
 apiVersion: kubeadm.k8s.io/v1beta2
 kind: ClusterConfiguration
 networking:
-        podSubnet: "192.168.1.0/16"
+        podSubnet: "${POD_SUBNET}"
 kubernetesVersion: stable
 apiServer:
   certSANs:
@@ -62,9 +66,9 @@ etcd:
         - https://$ETCD0:2379
         - https://$ETCD1:2379
         - https://$ETCD2:2379
-        caFile: /etc/kubernetes/pki/etcd/ca.crt
-        certFile: /etc/kubernetes/pki/apiserver-etcd-client.crt
-        keyFile: /etc/kubernetes/pki/apiserver-etcd-client.key
+        caFile: ${ETCD_SSL_DIR}/ca.crt
+        certFile: ${MAIN_SSL_DIR}/apiserver-etcd-client.crt
+        keyFile: ${MAIN_SSL_DIR}/apiserver-etcd-client.key
 EOF
 
 
