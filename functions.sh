@@ -9,24 +9,23 @@ copirator() {
 }
 
 
-
 checker() {
-  
-  echo "Checking if k8s initialization's been completed successfully..."
-  
-  VAR=$( ssh "$USER@$MASTER1 kubectl --kubeconfig /etc/kubernetes/admin.conf get pod -n kube-system -w | tail -n +2 | grep -vc Running" )
 
-  if [[ $VAR  -ne 0 ]];
+echo -e "${green}Checking if k8s initialization's been completed successfully...${NC}"
+
+VAR=$( ssh -t $USER@$MASTER1 << EOF
+kubectl --kubeconfig ${KUBE_CONF} get pod -n kube-system -w | tail -n +2 | grep -vc Running
+EOF
+ )
+
+
+if [[ $VAR  -ne 0 ]];
   then 
 	  echo -e "${red}The master hasn't been initialized:(${NC}"
-	  ssh $USER@$MASTER1 "kubectl --kubeconfig /etc/kubernetes/admin.conf get pod -n kube-system -w"
+	  exit 1
   else
-	  echo -e "${green}The master has been initialized successfully${NC}"
-  exit 1
-  else:
-
+	  echo -e "${green}All kube-system pods are up and runnin on ${MASTER1}"
   fi
+
 }
-
-
 
