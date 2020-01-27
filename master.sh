@@ -1,24 +1,7 @@
 #!/usr/bin/env bash
 
 source vars.txt
-
-
-copirator() {
-  echo -e "${green}Started copying the files. Using $USER user and $1 target host${NC}"
-  sleep 3
-  scp $2 $USER@$1:$3
-}
-
-
-checker() {
-  VAR=$( ssh $USER@$MASTER1 kubectl --kubeconfig /etc/kubernetes/admin.conf get pod -n kube-system -w | tail -n +2 | grep -vc Running )
-
-  if [[ $VAR  -ne 0 ]];
-  then echo -e "${red}The master hasn't been initialized:(${NC}";
-  exit 1
-  fi
-}
-
+source functions.sh
 
 
 echo -e "${green}Checking the files on source${NC}"
