@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-
+#Assuming haproxy's been already installed by Ansible using any package manager
 #This script should be run via Ansible on all the ETCD nodes from HA cluster
 #The scripts requires parameters ( VIP & IPs of master nodes on backend)
 #e.g ./haproxy.sh 193.111.63.252-VIP 193.111.63.249-MASTER1 193.111.63.240MASTER2 193.111.63.235MASTER3 193.111.63.228MASTER4
